@@ -56,7 +56,25 @@
 <body>
 <div class="announcement">EXCLUSIVELY IMPORTED CLOTHING &nbsp;·&nbsp; YOUR STYLE. YOUR AURA.</div>
 <header class="nav">
-  <a class="brand" href="#">SAVEORA<small>SAVE YOUR AURA</small></a>
+  
+<a class="brand" href="#" aria-label="SAVEORA Home">
+  <img src="/SAVEORA_Reel_logo_4x.png" alt="SAVEORA — Save Your Aura" class="brand-logo">
+</a>
+
+.brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.brand-logo {
+  display: block;
+  width: 150px;
+  height: auto;
+  max-height: 60px;
+  object-fit: contain;
+}
+
   <nav class="navlinks"><a href="#shop">Shop</a><a href="#story">Our Aura</a><a href="#contact">Contact</a></nav>
   <button class="cartbtn" onclick="openCart()">Bag <span id="cartCount">0</span></button>
 </header>
