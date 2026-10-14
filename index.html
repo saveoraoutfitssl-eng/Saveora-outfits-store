@@ -313,11 +313,13 @@ function closeCart() {
   document.body.style.overflow = "";
 }
 
-document.getElementById("checkoutForm").addEventListener("submit", e => {
+
+document.getElementById("checkoutForm").addEventListener("submit", async e => {
   e.preventDefault();
 
   const items = Object.values(cart).filter(item => item.quantity > 0);
   const notice = document.getElementById("notice");
+  const button = e.target.querySelector('button[type="submit"]');
 
   notice.classList.add("show");
 
@@ -328,15 +330,61 @@ document.getElementById("checkoutForm").addEventListener("submit", e => {
 
   const data = new FormData(e.target);
 
-  if (data.get("payment") === "Online") {
+  if (data.get("payment") !== "COD") {
     notice.textContent =
-      "Online payments are not connected yet. A secure payment gateway must be configured before accepting live payments.";
+      "Online payments are not available yet. Please select Cash on Delivery.";
     return;
   }
 
-  notice.textContent =
-    "Demo only — no order has been sent or saved. Connect a secure order backend or your official business WhatsApp before launch.";
+  const payload = {
+    customer: {
+      first: data.get("first"),
+      last: data.get("last"),
+      phone: data.get("phone"),
+      email: data.get("email"),
+      address: data.get("address"),
+      city: data.get("city"),
+      district: data.get("district")
+    },
+    payment: "COD",
+    items: items.map(item => ({
+      id: item.id,
+      size: item.size,
+      color: item.color,
+      quantity: item.quantity
+    }))
+  };
+
+  button.disabled = true;
+  notice.textContent = "Submitting your order...";
+
+  try {
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Order submission failed.");
+    }
+
+    notice.textContent =
+      `Thank you! Your order has been received. Order ID: ${result.orderId}. Total: ${money(result.total)}. Payment: Cash on Delivery.`;
+
+    cart = {};
+    updateCart();
+    e.target.reset();
+  } catch (error) {
+    notice.textContent =
+      error.message || "Unable to submit your order. Please try again.";
+  } finally {
+    button.disabled = false;
+  }
 });
+
 
 document.getElementById("year").textContent =
   new Date().getFullYear();
